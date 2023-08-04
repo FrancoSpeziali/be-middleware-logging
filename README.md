@@ -1,67 +1,84 @@
 # Using middleware to log requests to an API
 
-This project will have you building your own middleware, to log requests to an API
+A server log is a text document that contains all activities of a server. It can give you details of how, when, and who accessed your application.
 
 ## What you will be doing
 
-This project will allow you to practise using:
+To simulate a server in the real world, you will create some server endpoints to service requests from a client. In the real world, the server will also keep track of all requests to the server. You will be writing a middleware function to do this.
 
-> Creating middleware in Express.js
-
-This project assumes you've already had experience with:
-
-> Express.js middleware
-> Node.js filesystem
-
-To do this project, you must have completed:
-
-**express-solar-system-api**
+A helper function has already been written for you which writes data to the file system.
 
 ## Tasks
 
-### Task 1 - Writing your middleware function
+### Task 1 - Creating some endpoints
 
-Use the snippet **middleware template**
+We need a few endpoints for the server.
 
-Your middleware should intercept **all** requests from the client, and write some data to a file
+In the file `server.js`;
 
-Each **new line** in the file should include the:
+1. Create a `GET` endpoint which has the path `"/travel"`. It can return any random data you like.
+2. Create a `GET` endpoint which has the path `"/search"`. It can return any random data you like.
+3. Create a `POST` endpoint which has the path `"/subscribe"`. It can return any random data you like.
+4. Create a `POST` endpoint which has the path `"/createBooking"`. It can return any random data you like.
+5. Create a `PATCH` endpoint which has the path `"/update"`. It can return any random data you like.
 
-- `request.ip` - the ip of the client
-- `request.method` - the method or type of request
-- `request.originalUrl` - the original request url
+### Task 2 - Reading the Express documentation
 
-> Hint: You can use `fs.writeFile()` to write to a file
-> Hint: You can create a new line by writing `\n` at the end of each line
+1. Read the Express request object [ip](http://expressjs.com/en/4x/api.html#req.ip) property
+2. Read the Express request object [method](http://expressjs.com/en/4x/api.html#req.method) property
+3. Read the Express request object [originalUrl](http://expressjs.com/en/4x/api.html#req.originalUrl) property
 
-Each of these values should be separated with a pipe character `|`, surrounded by a whitespace character.
+When you have finished, create a new file `logger.js`. This is where you will write your middleware.
 
-For example:
+### Task 3 - Writing your middleware
 
-```text
-127.0.0.1 | GET | /planets/find
-```
+Working within `logger.js`;
 
-### Task 2 - Reviewing the log
+1. Use the following snippet of code to structure your middlware.
 
-- Create a new endpoint, which allows the user to **GET** all the data from the log file
+   ```js
+   function logger(req, res, next) {
+     next();
+   }
+   ```
 
-The endpoint should read the log file and **respond** with all the data from the file
+2. Within the `logger` function, create the variable `data`
 
-> Hint: You can use `fs.readFile()` to read from a file
+3. Using the information you learned from the documentation, assign a string to the variable `data` which includes the;
 
-## Task 3 - Ignore requests for the log
+   - **request.ip** - the ip of the client
+   - **request.method** - the method or type of request
+   - **request.originalUrl** - the original request url
 
-In the middleware you created for Task 1, make it so that the any requests for the **log endpoint** you created in Task 2, is not recorded to the log
+   You can separate each piece of information with a pipe `|` character.
 
-### Task 4 - Securing the log
+   For example:
 
-- Write some middleware which will only allow requests through which include the query parameter `secret`, and where the query parameter `secret` matches a value (of your choice)
+   ```text
+   127.0.0.1 | GET | /travel
+   ```
 
-- Use this middleware to "protect" the endpoint you wrote in **Task 2**
+> 👽 Important! The `next()` function should be the **last** instruction in the function! Why? Because this calls the next middleware in the chain, and signifies that your middleware is complete.
 
-### Task 5 - Add some data to your log
+### Task 4 - Writing your middleware (continued)
 
-- Make a number of requests to your endpoint to generate some data for your log
+1. Import the `appendToLogFile` function from `helpers.js` into `logger.js`
+2. Inside the `logger` function, execute `appendToLogFile` with the `data` variable as your argument
+3. Export your middleware function
 
-- Review your log using the API and see what data you got!
+### Task 5 - Implementing the middleware
+
+Now is the time to use your middleware! We must add it to our middleware "chain".
+
+Inside `server.js`;
+
+1. Import your middleware function
+2. Mount your middleware into your express application with the `app.use()` function, using the path `"/"`. This should be written **before** your endpoint handlers.
+
+> 🦥 The path `"/"` is the root path, which means it will catch every request
+
+### Task 6 - Add some data to your log
+
+Using an API testing tool like [insomnia](https://insomnia.rest/) or [postman](https://www.postman.com/), create some requests to your server endpoint to generate data for your log.
+
+Review your log file (`log.text`) and see what data was created!
